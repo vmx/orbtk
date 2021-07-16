@@ -2,13 +2,12 @@
 
 use std::sync::mpsc;
 
-pub use super::native::*;
+pub use super::native;
 
-use crate::prelude::*;
+use crate::prelude::{ShellRequest, WindowAdapter, WindowSettings};
 
-use self::states::*;
-pub use self::window::*;
-pub use self::window_builder::*;
+pub use self::window::Window;
+pub use self::window_builder::WindowBuilder;
 
 mod states;
 mod window;

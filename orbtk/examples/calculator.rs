@@ -4,6 +4,8 @@ use orbtk::{
 };
 
 static DARK_EXT: &str = include_str!("assets/calculator/calculator_dark.ron");
+const DISPLAYWIDTH: u16 = 1404;
+const DISPLAYHEIGHT: u16 = 1872;
 
 fn theme() -> Theme {
     orbtk::widgets::themes::theme_orbtk::register_default_fonts(Theme::from_config(
@@ -58,6 +60,7 @@ impl MainViewState {
         } else {
             MainView::text_set(&mut ctx.widget(), format!("{:.8}", result));
         }
+        println!("vmx: result: {:?}", result);
 
         self.left_side = Some(result);
         self.right_side = None;
@@ -75,6 +78,7 @@ impl State for MainViewState {
             match message {
                 Action::Digit(digit) => {
                     self.input.push(digit);
+                    println!("vmx: push digit: {:?}", digit);
                     TextBlock::text_mut(&mut ctx.child("input")).push(digit);
                 }
                 Action::Operator(operator) => match operator {
@@ -133,9 +137,11 @@ fn generate_digit_button(
 
     let button = Button::new()
         .style(style)
-        .min_size(48.0, 48)
+        .size(350, 350)
         .text(sight.to_string())
+        .font_size(128)
         .on_click(move |states, _| -> bool {
+            println!("vmx: digit button clicked: {:?}", sight);
             states.send_message(Action::Digit(sight), id);
             true
         })
@@ -163,8 +169,9 @@ fn generate_operation_button(
 
     let button = Button::new()
         .style(style)
-        .min_size(48.0, 48)
+        .size(350, 350)
         .text(sight.to_string())
+        .font_size(128)
         .on_click(move |states, _| -> bool {
             states.send_message(Action::Operator(sight), id);
             true
@@ -181,80 +188,84 @@ widget!(MainView<MainViewState> {
 
 impl Template for MainView {
     fn template(self, id: Entity, ctx: &mut BuildContext) -> Self {
-        self.name("MainView").width(212).height(336).text("").child(
-            Grid::new()
-                .rows("72, *")
-                .child(
-                    Container::new()
-                        .padding(8)
-                        .style("header_area")
-                        .attach(Grid::row(0))
-                        .child(
-                            Grid::new()
-                                .child(
-                                    ScrollViewer::new()
-                                        .mode(("custom", "disabled"))
-                                        .child(
-                                            TextBlock::new()
-                                                .width(0)
-                                                .height(14)
-                                                .text("")
-                                                .style("input")
-                                                .id("input")
-                                                .v_align("start")
-                                                .build(ctx),
-                                        )
-                                        .build(ctx),
-                                )
-                                .child(
-                                    TextBlock::new()
-                                        .style("result")
-                                        .text(id)
-                                        .v_align("end")
-                                        .h_align("end")
-                                        .build(ctx),
-                                )
-                                .build(ctx),
-                        )
-                        .build(ctx),
-                )
-                .child(
-                    Container::new()
-                        .style("content_container")
-                        .padding(4)
-                        .attach(Grid::row(1))
-                        .child(
-                            Grid::new()
-                                .columns("48, 4, 48, 4, 48, 3, 48")
-                                .rows("48, 4, 48, 4, 48, 4, 48, 4, 48")
-                                // row 0
-                                .child(generate_operation_button(ctx, id, 'C', false, 0, 5, 0))
-                                .child(generate_operation_button(ctx, id, '/', true, 6, 3, 0))
-                                // row 2
-                                .child(generate_digit_button(ctx, id, '7', false, 0, 1, 2))
-                                .child(generate_digit_button(ctx, id, '8', false, 2, 1, 2))
-                                .child(generate_digit_button(ctx, id, '9', false, 4, 1, 2))
-                                .child(generate_operation_button(ctx, id, '*', true, 6, 1, 2))
-                                // row 4
-                                .child(generate_digit_button(ctx, id, '4', false, 0, 1, 4))
-                                .child(generate_digit_button(ctx, id, '5', false, 2, 1, 4))
-                                .child(generate_digit_button(ctx, id, '6', false, 4, 1, 4))
-                                .child(generate_operation_button(ctx, id, '-', true, 6, 1, 4))
-                                // row 6
-                                .child(generate_digit_button(ctx, id, '1', false, 0, 1, 6))
-                                .child(generate_digit_button(ctx, id, '2', false, 2, 1, 6))
-                                .child(generate_digit_button(ctx, id, '3', false, 4, 1, 6))
-                                .child(generate_operation_button(ctx, id, '+', true, 6, 1, 6))
-                                // row 8
-                                .child(generate_digit_button(ctx, id, '0', false, 0, 3, 8))
-                                .child(generate_digit_button(ctx, id, '.', false, 4, 1, 8))
-                                .child(generate_operation_button(ctx, id, '=', true, 6, 1, 8))
-                                .build(ctx),
-                        )
-                        .build(ctx),
-                )
-                .build(ctx),
-        )
+        self.name("MainView")
+            .width(DISPLAYWIDTH)
+            .height(DISPLAYHEIGHT)
+            .text("")
+            .child(
+                Grid::new()
+                    .rows("144, *")
+                    .child(
+                        Container::new()
+                            .padding(8)
+                            .style("header_area")
+                            .attach(Grid::row(0))
+                            .child(
+                                Grid::new()
+                                    .child(
+                                        ScrollViewer::new()
+                                            .mode(("custom", "disabled"))
+                                            .child(
+                                                TextBlock::new()
+                                                    .width(0)
+                                                    .height(30)
+                                                    .text("")
+                                                    .style("input")
+                                                    .id("input")
+                                                    .v_align("start")
+                                                    .build(ctx),
+                                            )
+                                            .build(ctx),
+                                    )
+                                    .child(
+                                        TextBlock::new()
+                                            .style("result")
+                                            .text(id)
+                                            .v_align("end")
+                                            .h_align("end")
+                                            .build(ctx),
+                                    )
+                                    .build(ctx),
+                            )
+                            .build(ctx),
+                    )
+                    .child(
+                        Container::new()
+                            .style("content_container")
+                            .padding(4)
+                            .attach(Grid::row(1))
+                            .child(
+                                Grid::new()
+                                    .columns("350, 4, 350, 4, 350, 3, 350")
+                                    .rows("350, 4, 350, 4, 350, 4, 350, 4, 350")
+                                    // row 0
+                                    .child(generate_operation_button(ctx, id, 'C', false, 0, 5, 0))
+                                    .child(generate_operation_button(ctx, id, '/', true, 6, 3, 0))
+                                    // row 2
+                                    .child(generate_digit_button(ctx, id, '7', false, 0, 1, 2))
+                                    .child(generate_digit_button(ctx, id, '8', false, 2, 1, 2))
+                                    .child(generate_digit_button(ctx, id, '9', false, 4, 1, 2))
+                                    .child(generate_operation_button(ctx, id, '*', true, 6, 1, 2))
+                                    // row 4
+                                    .child(generate_digit_button(ctx, id, '4', false, 0, 1, 4))
+                                    .child(generate_digit_button(ctx, id, '5', false, 2, 1, 4))
+                                    .child(generate_digit_button(ctx, id, '6', false, 4, 1, 4))
+                                    .child(generate_operation_button(ctx, id, '-', true, 6, 1, 4))
+                                    // row 6
+                                    .child(generate_digit_button(ctx, id, '1', false, 0, 1, 6))
+                                    .child(generate_digit_button(ctx, id, '2', false, 2, 1, 6))
+                                    .child(generate_digit_button(ctx, id, '3', false, 4, 1, 6))
+                                    .child(generate_operation_button(ctx, id, '+', true, 6, 1, 6))
+                                    // row 8
+                                    .child(generate_digit_button(ctx, id, '0', false, 0, 3, 8))
+                                    .child(generate_digit_button(ctx, id, '.', false, 4, 1, 8))
+                                    .child(generate_operation_button(ctx, id, '=', true, 6, 1, 8))
+                                    .build(ctx),
+                            )
+                            .build(ctx),
+                    )
+                    .build(ctx),
+            )
     }
 }
 
@@ -264,8 +275,8 @@ fn main() {
         .window(|ctx| {
             Window::new()
                 .title("OrbTk - Calculator example")
-                .position((100, 100))
-                .size(212.0, 336)
+                .position((0, 0))
+                .size(DISPLAYWIDTH, DISPLAYHEIGHT)
                 .child(MainView::new().build(ctx))
                 .build(ctx)
         })
